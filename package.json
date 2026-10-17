@@ -1,5 +1,5 @@
 {
-  "name": "codex-usage-monitor",
+  "name": "bm-codex-usage-monitor",
   "displayName": "bm.Codex Usage Monitor",
   "description": "A compact Codex usage indicator for the VS Code status bar.",
   "icon": "images/westbohemia-logo-drawn-cap-plane-transparent-128.png",
