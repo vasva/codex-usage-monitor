@@ -2,8 +2,8 @@
   "name": "codex-usage-monitor",
   "displayName": "bm.Codex Usage Monitor",
   "description": "A compact Codex usage indicator for the VS Code status bar.",
-  "icon": "images/icon.png",
-  "version": "0.0.2",
+  "icon": "images/westbohemia-logo-drawn-cap-plane-transparent-128.png",
+  "version": "0.0.3",
   "publisher": "local",
   "repository": {
     "type": "git",
