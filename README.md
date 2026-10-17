@@ -1,5 +1,7 @@
 # bm.Codex Usage Monitor
 
+Project page: [WESTBOHEMIA.COM](https://westbohemia.com/developer/codex-usage-monitor/).
+
 A small Visual Studio Code extension that shows the remaining Codex usage in the status bar and its tooltip.
 
 ## Requirements
