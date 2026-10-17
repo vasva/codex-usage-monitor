@@ -53,27 +53,6 @@ function remainingPercent(window) {
   return `${Math.round(Math.max(0, Math.min(100, 100 - usedPercent)))}%`;
 }
 
-function resetTime(window, includeDate = false) {
-  const resetsAt = window?.resetsAt ?? window?.resets_at;
-  if (typeof resetsAt !== "number" || !Number.isFinite(resetsAt)) return "time unavailable";
-
-  const resetDate = new Date(resetsAt * 1000);
-  if (!Number.isFinite(resetDate.getTime())) return "time unavailable";
-  if (includeDate) {
-    return new Intl.DateTimeFormat(undefined, { dateStyle: "short", timeStyle: "short" }).format(resetDate);
-  }
-
-  const now = new Date();
-  const sameDay = resetDate.getFullYear() === now.getFullYear() &&
-    resetDate.getMonth() === now.getMonth() &&
-    resetDate.getDate() === now.getDate();
-  const formatOptions = sameDay
-    ? { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }
-    : { weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
-
-  return new Intl.DateTimeFormat(undefined, formatOptions).format(resetDate);
-}
-
 function resetCountdown(window) {
   const resetsAt = window?.resetsAt ?? window?.resets_at;
   if (typeof resetsAt !== "number" || !Number.isFinite(resetsAt) || resetsAt <= 0) {
@@ -154,10 +133,10 @@ function renderUsage(statusItem, response) {
     ? `$(robot) ${statusParts.join(" | ")}`
     : "$(robot) 5h --% | w --%";
   const fiveHourTooltip = visibleFiveHourWindow
-    ? `\n\n&nbsp;&nbsp;5-hour window: **${remainingPercent(visibleFiveHourWindow)} (${resetTime(visibleFiveHourWindow)})**&nbsp;&nbsp;  \n<table width="100%"><tr><td>&nbsp;&nbsp;${usageBar(visibleFiveHourWindow, "#f59e0b", "5-hour window")}</td><td align="right">in ${resetCountdown(visibleFiveHourWindow)} (resets ${resetOccurrence(visibleFiveHourWindow)})&nbsp;&nbsp;</td></tr></table>`
+    ? `\n\n&nbsp;&nbsp;5-hour window: **${remainingPercent(visibleFiveHourWindow)} remaining**&nbsp;&nbsp;  \n<table width="100%"><tr><td>&nbsp;&nbsp;${usageBar(visibleFiveHourWindow, "#f59e0b", "5-hour window")}</td><td align="right">in ${resetCountdown(visibleFiveHourWindow)} (resets ${resetOccurrence(visibleFiveHourWindow)})&nbsp;&nbsp;</td></tr></table>`
     : "";
   const weeklyTooltip = visibleWeeklyWindow
-    ? `\n\n&nbsp;&nbsp;Weekly window: **${remainingPercent(visibleWeeklyWindow)} (${resetTime(visibleWeeklyWindow, true)})**&nbsp;&nbsp;  \n<table width="100%"><tr><td>&nbsp;&nbsp;${usageBar(visibleWeeklyWindow, "#40e0d0", "Weekly window")}</td><td align="right">in ${resetCountdown(visibleWeeklyWindow)} (resets ${resetOccurrence(visibleWeeklyWindow)})&nbsp;&nbsp;</td></tr></table>`
+    ? `\n\n&nbsp;&nbsp;Weekly window: **${remainingPercent(visibleWeeklyWindow)} remaining**&nbsp;&nbsp;  \n<table width="100%"><tr><td>&nbsp;&nbsp;${usageBar(visibleWeeklyWindow, "#40e0d0", "Weekly window")}</td><td align="right">in ${resetCountdown(visibleWeeklyWindow)} (resets ${resetOccurrence(visibleWeeklyWindow)})&nbsp;&nbsp;</td></tr></table>`
     : "";
   const tooltip = new vscode.MarkdownString(
     `<table width="1"><tr><td width="1" height="4"></td></tr></table>\n\n&nbsp;&nbsp;**Codex remaining usage**&nbsp;&nbsp;${fiveHourTooltip}${weeklyTooltip}\n\n<table width="1"><tr><td width="1" height="4"></td></tr></table>`
