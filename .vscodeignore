@@ -1,3 +1,5 @@
 .vscode/**
 codex-usage-monitor-tooltip.png
 *.vsix
+images/**
+!images/icon.png
