@@ -1,4 +1,4 @@
-# Codex Usage Monitor
+# bm.Codex Usage Monitor
 
 A small Visual Studio Code extension that shows the remaining Codex usage in the status bar and its tooltip.
 
