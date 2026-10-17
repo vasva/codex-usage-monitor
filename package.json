@@ -4,7 +4,7 @@
   "description": "A compact Codex usage indicator for the VS Code status bar.",
   "icon": "images/westbohemia-logo-drawn-cap-plane-transparent-128.png",
   "version": "0.0.7",
-  "publisher": "local",
+  "publisher": "vasvasnr",
   "license": "MIT",
   "repository": {
     "type": "git",
