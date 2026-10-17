@@ -2,6 +2,7 @@
   "name": "codex-usage-monitor",
   "displayName": "Codex Usage Monitor",
   "description": "A compact Codex usage indicator for the VS Code status bar.",
+  "icon": "images/icon.png",
   "version": "0.0.1",
   "publisher": "local",
   "repository": {
