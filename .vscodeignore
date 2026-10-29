@@ -1,5 +1,10 @@
 .vscode/**
+docs/**
 CONTRIBUTING.md
+test/**
+codex-usage-monitor-*.png
+!codex-usage-monitor-statusbar-critical.png
+!codex-usage-monitor-statusbar-warning.png
 *.vsix
 images/**
 !images/westbohemia-logo-drawn-cap-plane-transparent-128.png

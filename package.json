@@ -3,7 +3,7 @@
   "displayName": "bm.Codex Usage Monitor",
   "description": "A compact Codex usage indicator for the VS Code status bar.",
   "icon": "images/westbohemia-logo-drawn-cap-plane-transparent-128.png",
-  "version": "0.0.7",
+  "version": "1.0.0",
   "publisher": "vasvasnr",
   "license": "MIT",
   "repository": {
@@ -22,5 +22,53 @@
   "main": "./extension.js",
   "activationEvents": [
     "onStartupFinished"
-  ]
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "contributes": {
+    "configuration": {
+      "title": "Codex Usage Monitor",
+      "properties": {
+        "codexUsageMonitor.statusBar.displayWindows": {
+          "type": "string",
+          "enum": [
+            "both",
+            "fiveHour",
+            "weekly"
+          ],
+          "default": "both",
+          "description": "Choose which Codex usage windows appear in the status bar."
+        },
+        "codexUsageMonitor.statusBar.fiveHourWarningThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 25,
+          "description": "Warning threshold for the five-hour remaining usage, in percent (0–100). The status bar turns orange below this value."
+        },
+        "codexUsageMonitor.statusBar.fiveHourCriticalThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 10,
+          "description": "Critical threshold for the five-hour remaining usage, in percent (0–100). The status bar turns red below this value."
+        },
+        "codexUsageMonitor.statusBar.weeklyWarningThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 25,
+          "description": "Warning threshold for weekly remaining usage, in percent (0–100). The status bar turns orange below this value."
+        },
+        "codexUsageMonitor.statusBar.weeklyCriticalThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 10,
+          "description": "Critical threshold for weekly remaining usage, in percent (0–100). The status bar turns red below this value."
+        }
+      }
+    }
+  }
 }
