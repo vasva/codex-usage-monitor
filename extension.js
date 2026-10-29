@@ -2,9 +2,18 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vscode = require("vscode");
 const { CodexUsageClient } = require("./usageClient");
+const {
+  getStatusBarPresentation,
+  normalizeThresholds,
+  remainingPercent
+} = require("./statusBarUsage");
 
 const CODEX_EXTENSION_ID = "openai.chatgpt";
 const POLL_INTERVAL_MS = 60_000;
+const DEFAULT_THRESHOLDS = {
+  fiveHour: { warning: 25, critical: 10 },
+  weekly: { warning: 25, critical: 10 }
+};
 
 function findCodexExecutable(extensionPath) {
   const targets = {
@@ -47,10 +56,20 @@ function findCodexExecutable(extensionPath) {
   return undefined;
 }
 
-function remainingPercent(window) {
-  const usedPercent = window?.usedPercent ?? window?.used_percent;
-  if (typeof usedPercent !== "number" || !Number.isFinite(usedPercent)) return "--%";
-  return `${Math.round(Math.max(0, Math.min(100, 100 - usedPercent)))}%`;
+function getStatusBarSettings() {
+  const settings = vscode.workspace.getConfiguration("codexUsageMonitor.statusBar");
+  const displayWindows = settings.get("displayWindows", "both");
+  const readWindowThresholds = (prefix) => normalizeThresholds(
+    settings.get(`${prefix}WarningThreshold`, DEFAULT_THRESHOLDS[prefix].warning),
+    settings.get(`${prefix}CriticalThreshold`, DEFAULT_THRESHOLDS[prefix].critical),
+    DEFAULT_THRESHOLDS[prefix]
+  );
+
+  return {
+    displayWindows,
+    fiveHourThresholds: readWindowThresholds("fiveHour"),
+    weeklyThresholds: readWindowThresholds("weekly")
+  };
 }
 
 function resetCountdown(window) {
@@ -124,14 +143,11 @@ function renderUsage(statusItem, response) {
     (window.windowDurationMins ?? window.window_minutes) === 10_080
   );
 
-  const visibleFiveHourWindow = fiveHourWindow;
-  const visibleWeeklyWindow = weeklyWindow;
-  const statusParts = [];
-  if (visibleFiveHourWindow) statusParts.push(`5h ${remainingPercent(visibleFiveHourWindow)}`);
-  if (visibleWeeklyWindow) statusParts.push(`w ${remainingPercent(visibleWeeklyWindow)}`);
-  statusItem.text = statusParts.length
-    ? `$(robot) ${statusParts.join(" | ")}`
-    : "$(robot) 5h --% | w --%";
+  const presentation = getStatusBarPresentation({ fiveHourWindow, weeklyWindow, ...getStatusBarSettings() });
+  const { visibleFiveHourWindow, visibleWeeklyWindow } = presentation;
+  statusItem.text = presentation.text;
+  statusItem.color = presentation.color;
+
   const fiveHourTooltip = visibleFiveHourWindow
     ? `\n\n&nbsp;&nbsp;5-hour window: **${remainingPercent(visibleFiveHourWindow)} remaining**&nbsp;&nbsp;  \n<table width="100%"><tr><td>&nbsp;&nbsp;${usageBar(visibleFiveHourWindow, "#f59e0b", "5-hour window")}</td><td align="right">in ${resetCountdown(visibleFiveHourWindow)} (resets ${resetOccurrence(visibleFiveHourWindow)})&nbsp;&nbsp;</td></tr></table>`
     : "";
@@ -158,16 +174,36 @@ function activate(context) {
   let client;
   let retryTimer;
   let disposed = false;
+  let statusState = "unavailable";
+  let latestResponse;
 
   const showNotInstalled = () => {
+    statusState = "notInstalled";
+    statusItem.color = undefined;
     statusItem.text = "$(robot) (-)";
     statusItem.tooltip = "Codex VS Code extension is not installed";
   };
 
   const showUnavailable = () => {
-    statusItem.text = "$(robot) 5h --% | w --%";
+    statusState = "unavailable";
+    statusItem.color = undefined;
+    statusItem.text = getStatusBarPresentation(getStatusBarSettings()).text;
     statusItem.tooltip = "Codex usage is currently unavailable";
   };
+
+  const showUsage = (response) => {
+    statusState = "usage";
+    latestResponse = response;
+    renderUsage(statusItem, response);
+  };
+
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
+    if (!event.affectsConfiguration("codexUsageMonitor.statusBar")) return;
+    if (statusState === "usage") {
+      renderUsage(statusItem, latestResponse);
+    }
+    else if (statusState === "unavailable") showUnavailable();
+  }));
 
   const scheduleRetry = () => {
     if (disposed || retryTimer) return;
@@ -205,7 +241,7 @@ function activate(context) {
 
     showUnavailable();
     const usageClient = new CodexUsageClient(executable, {
-      onUsage: (response) => renderUsage(statusItem, response),
+      onUsage: showUsage,
       onUnavailable: showUnavailable,
       onExit: () => {
         if (client !== usageClient) return;
